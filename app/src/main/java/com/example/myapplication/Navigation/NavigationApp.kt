@@ -1,6 +1,6 @@
 package com.example.sdv.Navigation
 
-// 🚀 Jetpack Compose runtime
+// Jetpack Compose runtime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +32,9 @@ import com.example.myapplication.Screens.FirstApp
 import com.example.myapplication.Screens.LoginApp
 import com.example.myapplication.Screens.SecondApp
 import com.example.myapplication.Screens.ThirdApp
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 
 @Composable
@@ -62,9 +65,11 @@ fun AppNavegation(){ //ESTA FUNCIÓN NO SE MUESTRA
 //Si BottomBar no recibiera navController, no podría mover pantallas.
 
 @Composable
-fun TopBar(navController: NavController) {
+fun TopBar(navController: NavHostController) {
 
-    var selected by rememberSaveable() { mutableStateOf("") }   // botón activo
+    // Esto escucha la pantalla actual
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,57 +78,72 @@ fun TopBar(navController: NavController) {
             .padding(start = 8.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         // ------- ESTADO → firstApp -------
         Button(
             onClick = {
-                selected = "estado"
-                navController.navigate("firstApp")
+                if (currentRoute != "firstApp") {   // evita navegar a la misma ruta
+                    navController.navigate("firstApp") {
+                        launchSingleTop = true      // no duplica la pantalla en el backstack
+                    }
+                }
             },
             modifier = Modifier
                 .weight(1f)
                 .height(50.dp)
                 .padding(end = 2.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (selected == "estado") Color(0xFF333333) else Color.Black
+                containerColor = if (currentRoute == "firstApp")
+                    Color(0xFF333333)
+                else
+                    Color.Black
             ),
             shape = RoundedCornerShape(6.dp),
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Text(text = "Estado")
         }
-
         // ------- CONFIGURACIÓN → secondApp -------
         Button(
             onClick = {
-                selected = "config"
-                navController.navigate("secondApp")
+                if (currentRoute != "secondApp") {
+                    navController.navigate("secondApp") {
+                        launchSingleTop = true
+                    }
+                }
             },
             modifier = Modifier
                 .weight(1f)
                 .height(50.dp)
                 .padding(horizontal = 2.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (selected == "config") Color(0xFF333333) else Color.Black
+                containerColor = if (currentRoute == "secondApp")
+                    Color(0xFF333333)
+                else
+                    Color.Black
             ),
             shape = RoundedCornerShape(6.dp),
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Text(text = "Configuración")
         }
-
         // ------- HISTORIAL → thirdApp -------
         Button(
             onClick = {
-                selected = "historial"
-                navController.navigate("thirdApp")
+                if (currentRoute != "thirdApp") {
+                    navController.navigate("thirdApp") {
+                        launchSingleTop = true
+                    }
+                }
             },
             modifier = Modifier
                 .weight(1f)
                 .height(50.dp)
                 .padding(start = 2.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (selected == "historial") Color(0xFF333333) else Color.Black
+                containerColor = if (currentRoute == "thirdApp")
+                    Color(0xFF333333)
+                else
+                    Color.Black
             ),
             shape = RoundedCornerShape(6.dp),
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)

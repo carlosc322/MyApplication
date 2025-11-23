@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.myapplication.Component.ModoAutomatico
 import com.example.myapplication.Component.ModoManual
 import com.example.myapplication.Component.MostrarTemp
@@ -27,9 +28,10 @@ import com.example.sdv.Navigation.BottomBar
 import com.example.sdv.Navigation.TopBar
 
 @Composable
-fun SecondApp(navController: NavController) {
+fun SecondApp(navController: NavHostController) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .statusBarsPadding(),
         topBar = { TopBar(navController) },
         bottomBar = { BottomBar() }
     ) { paddingValues ->

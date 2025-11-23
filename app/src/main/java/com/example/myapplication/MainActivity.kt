@@ -18,14 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Scaffold { paddingValues ->
-                Column(
-                    modifier =
-                        Modifier.padding(paddingValues)
-                ) {
-                    AppNavegation()
-                }
-            }
+            AppNavegation()
         }
     }
 }

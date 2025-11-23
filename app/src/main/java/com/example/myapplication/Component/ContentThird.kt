@@ -22,7 +22,7 @@ import java.util.Locale
 fun HistorialSensor() {
 
     // lista donde se guardan los datos del sensor
-    var listaDatos by remember { mutableStateOf(listOf<SensorData>()) }
+    var listaDatos by remember { mutableStateOf(listOf<SensorData>()) }//
     var cargando by remember { mutableStateOf(false) }
 
     Column(
@@ -33,13 +33,55 @@ fun HistorialSensor() {
         Text(text = "Los 10 últimos registros")
 
         Spacer(modifier = Modifier.height(16.dp))
+        // 🔘 Botón para recuperar los datos del sensor
+        Button(
+            onClick = {//<-- no es composable
+                cargando = true
+                /**
+                 * Esto significa:
+                 * Conéctate a la base de datos Firebase
+                 * Entra al nodo SensorData
+                 * Ahí es donde están guardados tus valores del sensor
+                 */
+
+                val referencia = Firebase.database.getReference("SensorData")
+
+                referencia.get().addOnSuccessListener { snapshot ->
+                    val temporal = mutableListOf<SensorData>() //listaTemporal
+                    //  RECUPERAR E ITERAR LOS DATOS
+                    for (registroHijo in snapshot.children) {//registro cada Hijo dato registrado
+                        val dato = registroHijo.getValue(SensorData::class.java)//combertirlo en objeto
+                        if (dato != null) {
+                            temporal.add(dato)
+                        }
+                    }
+                    // ORDENAR Y QUEDARSE SOLO CON los 10 ultimos
+                    val ordenados = temporal.sortedByDescending { it.timestamp }
+                    listaDatos = ordenados.take(10)
+
+                    cargando = false
+                }.addOnFailureListener {
+                    cargando = false
+                }
+            }
+        ) {
+            Text("Cargar historial")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        if (cargando) {
+            Text("Cargando datos")
+        }
+        // MOSTRAR LOS DATOS EN UN COLUMN CON UN FOR
+        for (dato in listaDatos) {
+            Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                Text("Temperatura: ${dato.raw_value} °C")
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("Fecha: ${convertirFecha(dato.timestamp)}")
+            }
+        }
 
     }
 }
-
-
-
-
 
 
 fun convertirFecha(segundos: Long?): String {
