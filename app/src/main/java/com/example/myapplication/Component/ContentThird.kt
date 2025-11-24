@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.componentestest.Componentes.Firebase.SensorData
+
+import com.example.myapplication.Firebase.SensorData
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 
@@ -33,7 +33,7 @@ fun HistorialSensor() {
         Text(text = "Los 10 últimos registros")
 
         Spacer(modifier = Modifier.height(16.dp))
-        // 🔘 Botón para recuperar los datos del sensor
+        //  Botón para recuperar los datos del sensor
         Button(
             onClick = {//<-- no es composable
                 cargando = true

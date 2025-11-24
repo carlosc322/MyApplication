@@ -2,10 +2,8 @@ package com.example.myapplication.Screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -15,13 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.myapplication.Component.HistorialSensor
-import com.example.myapplication.Component.ModoAutomatico
-import com.example.myapplication.Component.MostrarTemp
-import com.example.sdv.Navigation.BottomBar
-import com.example.sdv.Navigation.TopBar
+import com.example.myapplication.Navigation.BottomBar
+import com.example.myapplication.Navigation.TopBar
+
 
 @Composable
 fun ThirdApp(navController: NavHostController){

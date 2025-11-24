@@ -1,11 +1,8 @@
-package com.example.sdv.Navigation
+package com.example.myapplication.Navigation
 
 // Jetpack Compose runtime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 
 // 🧱 Layout y estilo
 import androidx.compose.foundation.background
@@ -25,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,8 +30,7 @@ import com.example.myapplication.Screens.FirstApp
 import com.example.myapplication.Screens.LoginApp
 import com.example.myapplication.Screens.SecondApp
 import com.example.myapplication.Screens.ThirdApp
-import androidx.compose.runtime.getValue
-import androidx.navigation.NavHostController
+
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 

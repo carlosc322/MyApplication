@@ -1,4 +1,5 @@
-package com.example.componentestest.Componentes.Firebase
+package com.example.myapplication.Firebase
+
 
 import android.util.Log
 import com.example.myapplication.Firebase.ActuatorControl

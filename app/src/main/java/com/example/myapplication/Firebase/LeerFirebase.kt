@@ -1,4 +1,4 @@
-package com.example.componentestest.Componentes.Firebase
+package com.example.myapplication.Firebase
 
 import android.util.Log
 import androidx.compose.runtime.Composable

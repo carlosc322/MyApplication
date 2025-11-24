@@ -24,8 +24,9 @@ import androidx.navigation.NavHostController
 import com.example.myapplication.Component.ModoAutomatico
 import com.example.myapplication.Component.ModoManual
 import com.example.myapplication.Component.MostrarTemp
-import com.example.sdv.Navigation.BottomBar
-import com.example.sdv.Navigation.TopBar
+import com.example.myapplication.Navigation.BottomBar
+import com.example.myapplication.Navigation.TopBar
+
 
 @Composable
 fun SecondApp(navController: NavHostController) {

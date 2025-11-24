@@ -13,13 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+
 import androidx.navigation.NavHostController
 import com.example.myapplication.Component.Botones
+import com.example.myapplication.Navigation.BottomBar
+import com.example.myapplication.Navigation.TopBar
 
-
-import com.example.sdv.Navigation.BottomBar
-import com.example.sdv.Navigation.TopBar
 
 @Composable
 fun FirstApp(navController: NavHostController){

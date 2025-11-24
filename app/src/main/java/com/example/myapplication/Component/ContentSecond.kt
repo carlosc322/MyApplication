@@ -1,11 +1,11 @@
 package com.example.myapplication.Component
 
-import androidx.annotation.ContentView
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,9 +39,9 @@ import androidx.compose.ui.text.input.KeyboardType
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.componentestest.Componentes.Firebase.LeerFirebase
-import com.example.componentestest.Componentes.Firebase.SensorData
-import com.example.componentestest.Componentes.Firebase.escribirFirebase
+import com.example.myapplication.Firebase.LeerFirebase
+import com.example.myapplication.Firebase.SensorData
+import com.example.myapplication.Firebase.escribirFirebase
 import com.example.myapplication.Firebase.ActuatorControl
 
 
