@@ -137,15 +137,14 @@ fun MostrarTemp() {
 --------------------------------------------------------- */
 @Composable
 fun ModoAutomatico() {
-    val (actuator, loading, error) = DatosActuator()
+    var (actuator, loading, error) = DatosActuator()
+    var onoff = actuator?.enabled
 
     // Estado local sincronizado con Firebase
     var activo by rememberSaveable { mutableStateOf(false) }
 
     // Cada vez que cambie actuator?.enabled, actualizamos el estado local
-    LaunchedEffect(actuator?.enabled) {
-        actuator?.enabled?.let { activo = it }
-    }
+
 
     val colorBoton =
         if (activo) Color(0xFF00C853)   // VERDE
@@ -214,7 +213,7 @@ fun ModoAutomatico() {
                             activo = !activo
 
                             val valorEnviar = ActuatorControl(
-                                enabled = activo,
+                                enabled = onoff,
                                 intensity = actuator?.intensity ?: 0,
                                 minIntensity = 15,
                                 maxIntensity = 255,
@@ -346,7 +345,7 @@ fun ModoManual() {
             if (mensaje != null) {
                 Text(
                     text = mensaje!!,
-                    color = Color.Red
+                    color = Color.White
                 )
             }
 

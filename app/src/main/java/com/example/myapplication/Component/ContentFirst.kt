@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,23 +27,66 @@ import com.example.myapplication.Firebase.ActuatorControl
 
 
 @Composable
-fun Botones(){
+fun Botones() {
+    // Leer el estado actual del actuador desde Firebase
+    val (actuator, loading, error) = DatosActuator()
+
+    // Estado local que se mantiene mientras la app está viva
     var estado by rememberSaveable { mutableStateOf(false) }
 
+    // Cada vez que Firebase traiga un "enabled" nuevo, lo copiamos a estado
+    LaunchedEffect(actuator?.enabled) { //<---
+        actuator?.enabled?.let { estado = it }
+    }
+
+    // Mientras carga, puedes mostrar algo simple
+    if (loading) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .background(Color.LightGray),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Cargando estado...", color = Color.Black)
+        }
+        return
+    }
+
+    // Si hay error
+    if (error != null) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .background(Color.LightGray),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Error: $error", color = Color.Red)
+        }
+        return
+    }
+
+    // Si llegamos aquí, ya tenemos datos (o al menos estado sincronizado)
     Column(
         modifier = Modifier
-            .padding(bottom = 100.dp)//Esto sube el colum de top al centro
+            .padding(bottom = 100.dp)
             .background(Color.LightGray)
             .offset(y = (-45).dp),
-        //horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(26.dp)//SEPARA_ENTRE_TODO_LOs_COMPONENTES
+        verticalArrangement = Arrangement.spacedBy(26.dp)
     ) {
 
         // ---------- BOTÓN APAGAR ----------
         Button(
             onClick = {
                 estado = false
-                var valorEnviar = ActuatorControl(enabled = false)
+
+                val valorEnviar = ActuatorControl(
+                    enabled = false,
+                    intensity = actuator?.intensity ?: 15,
+                    minIntensity = actuator?.minIntensity ?: 0,
+                    maxIntensity = actuator?.maxIntensity ?: 255,
+                    mode = "manual"
+                )
+
                 escribirFirebase(
                     field = "ActuatorControl",
                     value = valorEnviar
@@ -60,13 +104,22 @@ fun Botones(){
         ) {
             Text(text = "Apagar")
         }
+
         Spacer(modifier = Modifier.height(12.dp))
 
         // ---------- BOTÓN ENCENDER ----------
         Button(
             onClick = {
                 estado = true
-                var valorEnviar = ActuatorControl(enabled = true)
+
+                val valorEnviar = ActuatorControl(
+                    enabled = true,
+                    intensity = actuator?.intensity ?: 15,
+                    minIntensity = actuator?.minIntensity ?: 0,
+                    maxIntensity = actuator?.maxIntensity ?: 255,
+                    mode = "manual"
+                )
+
                 escribirFirebase(
                     field = "ActuatorControl",
                     value = valorEnviar
@@ -84,6 +137,5 @@ fun Botones(){
         ) {
             Text(text = "Encender")
         }
-
     }
 }
