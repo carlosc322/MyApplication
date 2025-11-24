@@ -1,6 +1,6 @@
 package com.example.myapplication.Component
 
-// ✔ Jetpack Compose
+
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -19,7 +19,6 @@ import com.example.myapplication.Firebase.SensorData
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 
-// ✔ Fecha y hora
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,7 +29,7 @@ import java.util.Locale
 fun HistorialSensor() {
 
     // lista donde se guardan los datos del sensor
-    var listaDatos by remember { mutableStateOf(listOf<SensorData>()) }//
+    var listaDatos by remember { mutableStateOf(listOf<SensorData>()) }
     var cargando by remember { mutableStateOf(false) }
 
     Box(
@@ -39,7 +38,7 @@ fun HistorialSensor() {
             .fillMaxHeight()
             .offset(y = (-310).dp),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .width(325.dp)
@@ -53,85 +52,86 @@ fun HistorialSensor() {
                     .width(190.dp)
                     .height(25.dp)
             ) {
-                Text(text = "Los 10 últimos registros",
+                Text(
+                    text = "Los 10 últimos registros",
                     modifier = Modifier.padding(
                         start = 13.dp,
-                        top = 6.dp),
+                        top = 6.dp
+                    ),
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 0.5.sp,
                     fontSize = 14.sp
                 )
             }
+
             Button(
-                onClick = {//<-- no es composable
+                onClick = {
                     cargando = true
-                    /**
-                     * Esto significa:
-                     * Conéctate a la base de datos Firebase
-                     * Entra al nodo SensorData
-                     * Ahí es donde están guardados tus valores del sensor
-                     */
+
+                    // Nos conectamos al nodo SensorData (un solo objeto)
                     val referencia = Firebase.database.getReference("SensorData")
 
-                    referencia.get().addOnSuccessListener { snapshot ->
-                        val temporal = mutableListOf<SensorData>()
-                        //  RECUPERAR E ITERAR LOS DATOS
-                        for (registroHijo in snapshot.children) {//registro cada Hijo dato registrado
-                            val valor = registroHijo.getValue(SensorData::class.java)
-                            if (valor != null) {
-                                // Conversión de raw_value Double → Int
-                                val entero = valor.raw_value.toInt()
+                    referencia.get()
+                        .addOnSuccessListener { snapshot ->
+                            // Leemos TODO el nodo como un SensorData
+                            val dato = snapshot.getValue(SensorData::class.java)
 
-                                // Reemplazamos el valor
-                                valor.raw_value = entero
+                            // Si existe, armamos una lista con ese único registro
+                            listaDatos = listOfNotNull(dato)
 
-                                temporal.add(valor)
-                            }
+                            cargando = false
                         }
-                        // ORDENAR Y QUEDARSE SOLO CON los 10 ultimos
-                        val ordenados = temporal.sortedByDescending { it.timestamp }
-                        listaDatos = ordenados.take(10)
-
-                        cargando = false
-                    }
+                        .addOnFailureListener {
+                            // Si falla, dejamos la lista vacía
+                            listaDatos = emptyList()
+                            cargando = false
+                        }
                 },
                 modifier = Modifier
-                        .width(90.dp)
-                        .height(40.dp)
-                        .offset(x = 33.dp),
+                    .width(90.dp)
+                    .height(40.dp)
+                    .offset(x = 33.dp),
                 shape = RoundedCornerShape(6.dp),
             ) {
-                Text("Cargar ")
+                Text(if (cargando) "..." else "Cargar ")
             }
         }
     }
-    Column(
+
+    for (dato in listaDatos) {
+        Row(
+            modifier = Modifier
+                .height(500.dp)
+                .width(325.dp)
+                .padding(vertical = 4.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(Color.Black)
+                .offset(y = (-214).dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Temperatura: ${dato.raw_value} °C",
+                color = Color.White,
+                modifier = Modifier.
+                padding(start = 17.dp))
+            Spacer(modifier = Modifier.width(30.dp))
+            Text("${convertirFecha(dato.timestamp)}",
+                color = Color.White,
+                modifier = Modifier
+                    .padding(end = 17.dp))
+        }
+    }
+
+    /*Column(
         modifier = Modifier
             .width(320.dp)
             .height(500.dp)
             .clip(RoundedCornerShape(3.dp))
-            .background(Color.DarkGray)
+            .background(Color.Transparent)
             .padding(top = 100.dp)
             .offset(y = (-125).dp)
-    ) {
-        for (dato in listaDatos) {
-            Row(
-                modifier = Modifier
-                    .height(30.dp)
-                    .width(305.dp)
-                    .padding(vertical = 4.dp)
-                    .background(Color.Green)
-            )
-            {
-                Text("Temperatura: ${dato.raw_value} °C")
-                Spacer(modifier = Modifier.width(16.dp))
-                Text("Fecha: ${convertirFecha(dato.timestamp)}")
-            }
-        }
-    }
+    ) {}*/
 }
-
 fun convertirFecha(segundos: Long?): String {
     if (segundos == null) return "Sin fecha"
     val millis = segundos * 1000L        // En tu base está en segundos
@@ -139,3 +139,4 @@ fun convertirFecha(segundos: Long?): String {
     val formato = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return formato.format(fecha)
 }
+

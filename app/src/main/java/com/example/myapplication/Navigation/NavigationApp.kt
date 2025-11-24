@@ -39,7 +39,7 @@ fun AppNavegation(){ //ESTA FUNCIÓN NO SE MUESTRA
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "firstApp"   //Crear el contenedor de navegación (NavHost)
+        startDestination = "login"   //Crear el contenedor de navegación (NavHost)
     ){
         composable("login"){
             LoginApp(navController)
