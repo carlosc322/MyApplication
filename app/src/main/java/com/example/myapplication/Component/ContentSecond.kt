@@ -30,7 +30,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
-
+import androidx.compose.runtime.remember
 
 
 import androidx.compose.ui.text.font.FontWeight
@@ -43,12 +43,17 @@ import com.example.myapplication.Firebase.LeerFirebase
 import com.example.myapplication.Firebase.SensorData
 import com.example.myapplication.Firebase.escribirFirebase
 import com.example.myapplication.Firebase.ActuatorControl
+import com.example.myapplication.Firebase.Configuracion
 
 
-// 🔹 Helpers para leer desde Firebase
+// Helpers para leer desde Firebase
 @Composable
 fun DatosActuator(): Triple<ActuatorControl?, Boolean, String?> {
     return LeerFirebase("ActuatorControl", ActuatorControl::class.java)
+}
+@Composable
+fun DatosConf(): Triple<Configuracion?, Boolean, String?> {
+    return LeerFirebase("Configuracion",Configuracion::class.java)
 }
 
 @Composable
@@ -56,7 +61,7 @@ fun DatosSensor(): Triple<SensorData?, Boolean, String?> {
     return LeerFirebase("SensorData", SensorData::class.java)
 }
 
-/* ---------------------------------------------------------
+/* -----------------------------------------------------------
    1) MOSTRAR TEMPERATURA
 --------------------------------------------------------- */
 @Composable
@@ -80,7 +85,6 @@ fun MostrarTemp() {
                     color = Color.White
                 )
             }
-
             error != null -> {
                 // Si hubo error
                 Text(
@@ -90,7 +94,6 @@ fun MostrarTemp() {
                     fontSize = 12.sp
                 )
             }
-
             else -> {
                 // Cuando ya tenemos el dato del sensor
                 Column(
@@ -137,51 +140,65 @@ fun MostrarTemp() {
 --------------------------------------------------------- */
 @Composable
 fun ModoAutomatico() {
-    var (actuator, loading, error) = DatosActuator()
-    var onoff = actuator?.enabled
 
-    // Estado local sincronizado con Firebase
-    var activo by rememberSaveable { mutableStateOf(false) }
+    //  Leer Firebase
+    val (configuracion, loadingConf, errorConf) = DatosConf()
+    val (actuator, loadingAct, errorAct) = DatosActuator()
 
-    // Cada vez que cambie actuator?.enabled, actualizamos el estado local
+    // Estados locales (solo para UI)
+    var activo by rememberSaveable { mutableStateOf("no_activo") }
+    var mensaje by remember { mutableStateOf("") }
 
+    // Valor REAL desde Firebase
+    val conf = configuracion?.conf ?: "no_activo"
+    val onoff = actuator?.enabled ?: false
 
+    // SINCRONIZAR UI CON FIREBASE
+    LaunchedEffect(conf) {
+        activo = conf
+    }
+
+    // Color según Firebase
     val colorBoton =
-        if (activo) Color(0xFF00C853)   // VERDE
-        else Color.Red                  // ROJO
+        if (activo == "activo") Color(0xFF00C853)   // VERDE
+        else Color.Red                              // ROJO
 
     val textoBoton =
-        if (activo) "ACTIVO"
+        if (activo == "activo") "ACTIVO"
         else "NO ACTIVO"
 
     Column(
         modifier = Modifier
-            .width(350.dp)
+            .fillMaxWidth()
             .padding(20.dp)
             .background(Color.LightGray)
             .offset(y = 6.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
+
+        // ---------------- TÍTULO ----------------
         Box(
             modifier = Modifier
                 .height(33.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(
-                    topStart = 3.dp,
-                    topEnd = 3.dp,
-                    bottomEnd = 3.dp
-                ))
-                .background(Color.Black)
-                .padding(end = 18.dp),
-            contentAlignment = Alignment.Center    // CENTRA EL TEXTO
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 3.dp,
+                        topEnd = 3.dp,
+                        bottomEnd = 3.dp
+                    )
+                )
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Configuración de la ventilación",
                 color = Color.White,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Medium
             )
         }
 
+        // ---------------- CUADRO AUTOMÁTICO ----------------
         Box(
             modifier = Modifier
                 .height(130.dp)
@@ -189,45 +206,59 @@ fun ModoAutomatico() {
                 .offset(y = (-5).dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(Color.White),
-            contentAlignment = Alignment.Center,    // CENTRA EL TEXTO
+            contentAlignment = Alignment.Center
         ) {
+
             Text(
                 text = "MODO AUTOMÁTICO:",
                 color = Color.DarkGray,
                 modifier = Modifier
-                    .padding(bottom = 100.dp, end = 123.dp),
-                fontWeight = FontWeight.Bold,
+                    .padding(bottom = 89.dp, end = 180.dp),
+                fontWeight = FontWeight.Bold
             )
-            when {//----------------------------------------------
-                loading -> {
-                    Text(text = "Cargando estado automático...")
+
+            when {
+                loadingConf || loadingAct -> {
+                    Text("Cargando estado automático...")
                 }
-                error != null -> {
-                    Text(text = "Error al leer actuator: $error", color = Color.Red)
+                errorConf != null -> {
+                    Text("Error Configuración: $errorConf", color = Color.Red)
+                }
+                errorAct != null -> {
+                    Text("Error Actuator: $errorAct", color = Color.Red)
                 }
                 else -> {
-                    Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
                         onClick = {
-                            activo = !activo
+                            // (activar / desactivar)
+                            val nuevoEstado =
+                                if (activo == "activo") "no_activo" else "activo"
 
-                            val valorEnviar = ActuatorControl(
-                                enabled = onoff,
-                                intensity = 0,
-                                minIntensity = 10,
-                                maxIntensity = 255,
-                                mode = "automatico",
-                                last_update = (System.currentTimeMillis() / 1000).toInt()
+                            if (!onoff) {
+                                mensaje = "Ventilador apagado"
+                            }
+
+                            // Guardar estado automático
+                            val nuevaConfig = Configuracion(
+                                conf = nuevoEstado
                             )
+                            escribirFirebase("Configuracion", nuevaConfig)
 
+                            // 🔹 Enviar actuator SIN cambiar encendido/apagado
+                            val valorEnviar = ActuatorControl(
+                                enabled = onoff, // SE RESPETA
+                                intensity = actuator?.intensity ?: 0,
+                                minIntensity = 15,
+                                maxIntensity = 255,
+                                mode = "automatico"
+                            )
                             escribirFirebase("ActuatorControl", valorEnviar)
                         },
                         modifier = Modifier
                             .width(170.dp)
                             .height(55.dp)
                             .offset(y = 4.dp),
-                            //.padding(start=108.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colorBoton
                         ),
@@ -235,10 +266,19 @@ fun ModoAutomatico() {
                     ) {
                         Text(textoBoton)
                     }
+                    if (mensaje.isNotEmpty()) {
+                        Text(
+                            text = mensaje,
+                            color = Color.DarkGray,
+                            modifier = Modifier
+                                .offset(y = 52.dp)
+                                .offset(x = -103.dp),
+                            fontSize = 13.sp,
+                        )
+                    }
                 }
-            }//----------------------------------
+            }
         }
-
     }
 }
 
@@ -259,7 +299,6 @@ fun ModoManual() {
         }
         return
     }
-
     if (error != null) {
         Column(
             modifier = Modifier
@@ -270,7 +309,6 @@ fun ModoManual() {
         }
         return
     }
-
     // Si llega aquí, podemos usar actuator (aunque igual puede ser null, lo cuidamos)
     val enabledActual = actuator?.enabled ?: false
 
@@ -280,6 +318,8 @@ fun ModoManual() {
     }
 
     var mensaje by rememberSaveable { mutableStateOf<String?>(null) }
+
+    var mensaje2 by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -309,7 +349,6 @@ fun ModoManual() {
                 fontWeight = FontWeight.SemiBold
             )
         }
-
         Box(
             modifier = Modifier
                 .height(190.dp)
@@ -326,7 +365,6 @@ fun ModoManual() {
                 modifier = Modifier
                     .padding(bottom = 150.dp, end = 195.dp),
                 fontWeight = FontWeight.Bold,
-
             )
             OutlinedTextField(
                 value = intensidadTexto,
@@ -340,49 +378,51 @@ fun ModoManual() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .width(300.dp)
-                    .padding(bottom =35.dp)
+                    .padding(bottom =50.dp)
             )
-
             if (mensaje != null) {
                 Text(
                     text = mensaje!!,
                     color = Color.White
                 )
             }
-
             Button(
                 onClick = {
+                    //  Limpiar mensajes
+                    mensaje = ""
+                    mensaje2 = ""
+
                     val intensidad = intensidadTexto.toIntOrNull()
 
+                    // ️ Validar intensidad
                     if (intensidad == null || intensidad !in 0..255) {
                         mensaje = "Ingresa un valor numérico entre 0 y 255."
-                    } else {
-
-                        val valorEnviar = ActuatorControl(
-                            enabled = enabledActual,
-                            intensity = intensidad,
-                            minIntensity = 0,
-                            maxIntensity = 0,
-                            mode = "manual",
-                            last_update = (System.currentTimeMillis() / 1000).toInt()
-                        )
-
-                        escribirFirebase(
-                            field = "ActuatorControl",
-                            value = valorEnviar
-                        )
-
-                        /*mensaje = if (enabledActual) {
-                            "Intensidad guardada y el sistema está ENCENDIDO."
-                        } else {
-                            "Intensidad guardada, pero el sistema está APAGADO."
-                        }*/
+                        return@Button
                     }
+                    //  Verificar si el ventilador está apagado
+                    if (actuator?.enabled == false) {
+                        mensaje2 = "Ventilador apagado"
+                    }
+
+                    //  Guardar SIEMPRE en Firebase (si pasó la validación)
+                    val valorEnviar = ActuatorControl(
+                        enabled = enabledActual,
+                        intensity = intensidad,
+                        minIntensity = 0,
+                        maxIntensity = 0,
+                        mode = "manual",
+                        last_update = (System.currentTimeMillis() / 1000).toInt()
+                    )
+
+                    escribirFirebase(
+                        field = "ActuatorControl",
+                        value = valorEnviar
+                    )
                 },
                 modifier = Modifier
                     .width(100.dp)
                     .height(48.dp)
-                    .offset(y = 55.dp),
+                    .offset(y = 63.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF2196F3)
                 ),
@@ -390,8 +430,25 @@ fun ModoManual() {
             ) {
                 Text(text = "OK")
             }
+            // Error de validación (intensidad)
+            if (!mensaje.isNullOrEmpty()) {
+                Text(text = mensaje!!
+                    ,modifier = Modifier
+                        .padding(top = 4.dp)
+                    .offset(y = 23.dp).offset(x = -35.dp)
+                    ,fontSize = 13.sp,)
+            }
+            // Advertencia ventilador apagado
+            if (mensaje2.isNotEmpty()) {
+                Text(
+                    text = mensaje2,
+                    color = Color.DarkGray,
+                    fontSize = 13.sp,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .offset(y = 23.dp).offset(x = -94.dp)
+                )
+            }
         }
-
-
     }
 }

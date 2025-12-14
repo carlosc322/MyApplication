@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.Firebase.escribirFirebase
 import com.example.myapplication.Firebase.ActuatorControl
+import com.example.myapplication.Firebase.Configuracion
 
 
 @Composable
@@ -92,6 +93,12 @@ fun Botones() {
                     field = "ActuatorControl",
                     value = valorEnviar
                 )
+
+                val valorConfig = Configuracion(
+                    conf = "no_activo"
+                )
+
+                escribirFirebase("Configuracion", value = valorConfig)
             },
             modifier = Modifier
                 .width(150.dp)
@@ -115,10 +122,10 @@ fun Botones() {
 
                 val valorEnviar = ActuatorControl(
                     enabled = true,//cuando quieres forzar que al presionar el botón la intensidad sea exactamente
-                    intensity = 15, //actuator?.intensity ?: 15,
-                    //minIntensity = actuator?.minIntensity ?: 0,
-                    //maxIntensity = actuator?.maxIntensity ?: 255,
-                    mode = "off",
+                    intensity = actuator?.intensity ?: 15,
+                    minIntensity = actuator?.minIntensity ?: 10,
+                    maxIntensity = actuator?.maxIntensity ?: 255,
+                    mode = actuator?.mode ?: "off",
                     last_update = (System.currentTimeMillis() / 1000).toInt()
                 )
 
@@ -141,3 +148,5 @@ fun Botones() {
         }
     }
 }
+
+

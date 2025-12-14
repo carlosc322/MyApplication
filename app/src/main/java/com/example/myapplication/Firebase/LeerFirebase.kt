@@ -30,18 +30,14 @@ fun <T> LeerFirebase(
     val myRef = database.getReference(field)
 
     LaunchedEffect(field) {
-        println("hola")
 
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
-                    println("holaListener")
-
                     val value = snapshot.getValue(valueType)
                     currentValue = value
                     isLoading = false
                     errorMessage = null
-                    Log.d("FirebaseObject", "Object updated: $value")
                 } catch (e: Exception) {
                     errorMessage = "Error parsing data: ${e.message}"
                     isLoading = false
@@ -51,13 +47,12 @@ fun <T> LeerFirebase(
             override fun onCancelled(error: DatabaseError) {
                 errorMessage = "Error: ${error.message}"
                 isLoading = false
-                Log.w("FirebaseObject", "Listen failed", error.toException())
             }
         }
 
         myRef.addValueEventListener(valueEventListener)
-        awaitCancellation()
     }
 
     return Triple(currentValue, isLoading, errorMessage)
 }
+

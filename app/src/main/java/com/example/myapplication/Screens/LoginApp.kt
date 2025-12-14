@@ -1,5 +1,6 @@
 package com.example.myapplication.Screens
 
+import android.R.attr.y
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,14 +37,20 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.remember
 import com.example.myapplication.Navigation.BottomBar
+import com.google.firebase.auth.FirebaseAuth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginApp(navController: NavHostController) {
-    var texto by rememberSaveable { mutableStateOf("") }
-    var texto2 by rememberSaveable { mutableStateOf("") }
+    val auth = FirebaseAuth.getInstance()
+
+    var texto by rememberSaveable { mutableStateOf("") }   // EMAIL
+    var texto2 by rememberSaveable { mutableStateOf("") }  // PASSWORD
+    var errore by remember { mutableStateOf("") }
+    var errorp by remember { mutableStateOf("") }
 
     Scaffold(
         modifier = Modifier
@@ -113,35 +120,78 @@ fun LoginApp(navController: NavHostController) {
                     Spacer(Modifier.height(16.dp))   // espacio bajo el título
 
                     Text(
-                        text = "NOMBRE:",
+                        text = "CORREO:",
                         color = Color.White,
                         fontWeight = FontWeight.Medium
                     )
                     TextField(
                         value = texto,
                         onValueChange = { texto = it },
-                        placeholder = { Text("Nombre de usuario") }
+                        modifier = Modifier.height(54.dp),
+                        placeholder = { Text("correo@gmail.com") }
+                    )
+                    Text( text = errore,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        modifier = Modifier.offset(y = (-4).dp)
                     )
 
                     Text(
                         text = "CONTRASEÑA:",
                         color = Color.White,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.offset(y = (-4).dp)
                     )
                     TextField(
                         value = texto2,
                         onValueChange = { texto2 = it },
+                        modifier = Modifier.height(54.dp).offset(y = (-4).dp),
                         placeholder = { Text("Contraseña") },
                         visualTransformation = PasswordVisualTransformation(),   // OCULTA la contraseña
                         singleLine = true                                         // evita saltos, una sola línea
                     )
+                    Text( text = errorp,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        modifier = Modifier.offset(y = (-4).dp)
+                    )
                     Button(
-                        onClick = {navController.navigate("firstApp")},
+                        onClick = {
+
+                            // Limpia errores anteriores
+                            errore = ""
+                            errorp = ""
+
+                            when {
+                                texto.isBlank() && texto2.isBlank() -> {
+                                    errore = "El correo es obligatorio"
+                                    errorp = "El campo es obligatorio"
+                                }
+                                texto.isBlank() -> {
+                                    errore = "El correo es obligatorio"
+                                }
+                                texto2.isBlank() -> {
+                                    errorp = "La campo es obligatoria"
+                                }
+                                else -> {
+                                    auth.signInWithEmailAndPassword(texto, texto2)
+                                        .addOnFailureListener {
+                                            errorp = "Usuario o contraseña incorrectos"
+                                        }
+                                        .addOnSuccessListener {
+                                            navController.navigate("firstApp") {
+                                                popUpTo("login") { inclusive = true }
+                                            }
+                                        }
+
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .width(100.dp)
                             .height(60.dp)
-                            .padding(top = 16.dp)// Más espacio hacia arriba--> aleja el boton ingresar de input
-                            .align(Alignment.End),// Mueve el botón a la derecha
+                            .padding(top = 0.dp)
+                            .align(Alignment.End),
                         shape = RoundedCornerShape(8.dp)
                     ){
                         Text("Ingresar")
@@ -150,7 +200,5 @@ fun LoginApp(navController: NavHostController) {
                 }
             }
         }
-
-
     }
 }

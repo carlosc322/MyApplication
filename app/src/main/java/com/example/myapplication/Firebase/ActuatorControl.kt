@@ -10,3 +10,4 @@ data class ActuatorControl(
 ){
     constructor() : this(enabled = false, intensity = 0, minIntensity = 0, maxIntensity = 0, last_update = 0, mode = "off")
 }
+

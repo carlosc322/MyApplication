@@ -6,9 +6,9 @@ import com.example.myapplication.Firebase.ActuatorControl
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 
-fun escribirFirebase(
+fun <T>escribirFirebase(
     field: String,
-    value: ActuatorControl,
+    value: T,
     onSuccess: () -> Unit = {},
     onError: (String) -> Unit = {}
 ) {
