@@ -248,10 +248,11 @@ fun ModoAutomatico() {
                             // 🔹 Enviar actuator SIN cambiar encendido/apagado
                             val valorEnviar = ActuatorControl(
                                 enabled = onoff, // SE RESPETA
-                                intensity = actuator?.intensity ?: 0,
-                                minIntensity = 15,
-                                maxIntensity = 255,
-                                mode = "automatico"
+                                intensity = 0,
+                                minIntensity = 180,
+                                maxIntensity = 250,
+                                mode = "automatico",
+                                last_update = (System.currentTimeMillis() / 1000).toInt()
                             )
                             escribirFirebase("ActuatorControl", valorEnviar)
                         },
@@ -373,8 +374,8 @@ fun ModoManual() {
                         intensidadTexto = newValue
                     }
                 },
-                label = { Text("Intensidad (0 - 255)") },
-                placeholder = { Text("Ej: 120") },
+                label = { Text("Intensidad (120 - 255)") },
+                placeholder = { Text("Ej: 140") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .width(300.dp)
